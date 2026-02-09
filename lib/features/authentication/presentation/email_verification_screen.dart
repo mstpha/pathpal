@@ -32,6 +32,8 @@ class _EmailVerificationScreenState
   @override
   void initState() {
     super.initState();
+    debugPrint('=== EmailVerificationScreen initialized ===');
+    debugPrint('Email passed to screen: ${widget.email}');
     _sendOtp();
   }
 
@@ -45,7 +47,7 @@ class _EmailVerificationScreenState
   void _startCooldown(int seconds) {
     setState(() {
       _resendCooldown = seconds;
-      _errorMessage = null; // Clear error when starting cooldown
+      _errorMessage = null;
     });
 
     _cooldownTimer?.cancel();
@@ -64,10 +66,16 @@ class _EmailVerificationScreenState
     if (_resendCooldown > 0) return;
 
     try {
+      debugPrint('=== Sending OTP ===');
+      debugPrint('Email: ${widget.email}');
+      debugPrint('Email (trimmed): ${widget.email.trim()}');
+
       await Supabase.instance.client.auth.signInWithOtp(
-        email: widget.email,
+        email: widget.email.trim(),
         emailRedirectTo: 'io.supabase.pfe1://login-callback',
       );
+
+      debugPrint('OTP sent successfully');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -78,13 +86,14 @@ class _EmailVerificationScreenState
         );
       }
 
-      // Start cooldown after successful send
       _startCooldown(60);
     } on AuthException catch (e) {
-      // Handle rate limit error
+      debugPrint('=== Send OTP AuthException ===');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Status Code: ${e.statusCode}');
+
       if (e.statusCode == '429' ||
           e.message.toLowerCase().contains('rate_limit')) {
-        // Extract seconds from error message
         final match = RegExp(r'(\d+)\s*second').firstMatch(e.message);
         final seconds =
             match != null ? int.tryParse(match.group(1) ?? '60') ?? 60 : 60;
@@ -96,6 +105,8 @@ class _EmailVerificationScreenState
         });
       }
     } catch (e) {
+      debugPrint('=== Send OTP Error ===');
+      debugPrint('Error: $e');
       setState(() {
         _errorMessage = 'Failed to send OTP: ${e.toString()}';
       });
@@ -103,10 +114,14 @@ class _EmailVerificationScreenState
   }
 
   Future<void> _verifyOtp() async {
+    debugPrint('=== Starting OTP Verification ===');
+    debugPrint('OTP entered: ${_pinController.text}');
+    debugPrint('OTP length: ${_pinController.text.length}');
+
     if (_pinController.text.length != 8) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a 8-digit code'),
+          content: Text('Please enter an 8-digit code'),
           backgroundColor: Colors.red,
         ),
       );
@@ -119,44 +134,96 @@ class _EmailVerificationScreenState
     });
 
     try {
-      // Verify OTP without changing to fully authenticated
-      await ref.read(authProvider.notifier).verifyOtp(
-            email: widget.email,
-            token: _pinController.text,
+      final otpCode = _pinController.text.trim();
+      final email = widget.email.trim();
+
+      debugPrint('=== Verification Details ===');
+      debugPrint('Email for verification: $email');
+      debugPrint('OTP code: $otpCode');
+      debugPrint('OTP code length: ${otpCode.length}');
+
+      // IMPORTANT: Try direct Supabase call first to see raw response
+      debugPrint('=== Calling Supabase verifyOTP directly ===');
+      final response = await Supabase.instance.client.auth.verifyOTP(
+        email: email,
+        token: otpCode,
+        type: OtpType.email,
+      );
+
+      debugPrint('=== Supabase Response ===');
+      debugPrint('Session exists: ${response.session != null}');
+      debugPrint('User exists: ${response.user != null}');
+
+      if (response.session != null) {
+        debugPrint(
+            'Access Token: ${response.session!.accessToken.substring(0, 20)}...');
+        debugPrint('User ID: ${response.session!.user.id}');
+        debugPrint('User Email: ${response.session!.user.email}');
+        debugPrint(
+            'Email Confirmed At: ${response.session!.user.emailConfirmedAt}');
+
+        // Now update the auth provider
+        await ref.read(authProvider.notifier).updateAuthState(response.session);
+
+        debugPrint('Auth state updated successfully');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Verification successful!'),
+              backgroundColor: Colors.green,
+            ),
           );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification successful'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Explicitly navigate to user details and maintain email unverified state
-        context.pushReplacement('/user-details', extra: widget.email);
+          debugPrint('Navigating to user-details');
+          context.pushReplacement('/user-details', extra: email);
+        }
+      } else {
+        debugPrint('ERROR: Response session is null!');
+        throw AuthException('Verification failed - no session returned');
       }
     } on AuthException catch (e) {
+      debugPrint('=== Verify OTP AuthException ===');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Status Code: ${e.statusCode}');
+
       if (mounted) {
+        setState(() {
+          _errorMessage = e.message;
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.message),
+            content: Text('Verification failed: ${e.message}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
     } catch (e) {
+      debugPrint('=== Verify OTP Error ===');
+      debugPrint('Error type: ${e.runtimeType}');
+      debugPrint('Error: $e');
+
       if (mounted) {
+        setState(() {
+          _errorMessage = 'Verification failed. Please try again.';
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('An unexpected error occurred: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -284,6 +351,10 @@ class _EmailVerificationScreenState
                               PinputAutovalidateMode.onSubmit,
                           showCursor: true,
                           onCompleted: (_) => _verifyOtp(),
+                          onChanged: (value) {
+                            debugPrint(
+                                'OTP input changed: $value (length: ${value.length})');
+                          },
                         ),
                         const SizedBox(height: 20),
                         if (_errorMessage != null)

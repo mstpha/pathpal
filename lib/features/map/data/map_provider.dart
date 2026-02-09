@@ -3,6 +3,7 @@ import 'package:latlong2/latlong.dart';
 import '../domain/location_model.dart';
 import 'map_service.dart';
 import 'directions_service.dart';
+import 'places_search_service.dart';
 
 // Provider for the MapService
 final mapServiceProvider = Provider<MapService>((ref) {
@@ -283,4 +284,40 @@ final mapProvider = StateNotifierProvider<MapNotifier, MapState>((ref) {
   final mapService = ref.watch(mapServiceProvider);
   final directionsService = ref.watch(directionsServiceProvider);
   return MapNotifier(mapService, directionsService);
+});
+// Provider for the PlacesSearchService
+final placesSearchServiceProvider = Provider<PlacesSearchService>((ref) {
+  return PlacesSearchService();
+});
+
+// State notifier for place search results
+class PlacesSearchNotifier extends StateNotifier<List<PlaceResult>> {
+  final PlacesSearchService _service;
+
+  PlacesSearchNotifier(this._service) : super([]);
+
+  Future<void> searchPlaces(String query) async {
+    if (query.isEmpty) {
+      state = [];
+      return;
+    }
+
+    try {
+      final results = await _service.searchPlaces(query);
+      state = results;
+    } catch (e) {
+      print('Error searching places: $e');
+      state = [];
+    }
+  }
+
+  void clear() {
+    state = [];
+  }
+}
+
+final placesSearchProvider =
+    StateNotifierProvider<PlacesSearchNotifier, List<PlaceResult>>((ref) {
+  final service = ref.watch(placesSearchServiceProvider);
+  return PlacesSearchNotifier(service);
 });

@@ -12,8 +12,8 @@ class PostService {
 
   Future<PostModel> createPost({
     required String userEmail,
-    required String title, 
-    String? description, 
+    required String title,
+    String? description,
     String? imageUrl,
     required List<InterestModel> interests,
   }) async {
@@ -28,8 +28,9 @@ class PostService {
 
       // Verify interests exist in the database
       final allInterests = await _interestService.fetchAllInterests();
-      final validInterests = interests.where((interest) => 
-        allInterests.any((ai) => ai.id == interest.id)).toList();
+      final validInterests = interests
+          .where((interest) => allInterests.any((ai) => ai.id == interest.id))
+          .toList();
 
       if (validInterests.isEmpty) {
         throw Exception('No valid interests selected');
@@ -71,23 +72,51 @@ class PostService {
   }
 
   Future<String?> uploadPostImage(String filePath) async {
-    final fileName = 'post_${DateTime.now().millisecondsSinceEpoch}${File(filePath).path.split('.').last}';
-    
     try {
-      await _supabase.storage
-          .from('post_images')
-          .upload(
-            fileName, 
-            File(filePath),
-            fileOptions: FileOptions(upsert: true),
+      // Check authentication first
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        debugPrint('User not authenticated');
+        throw Exception('User must be authenticated to upload images');
+      }
+
+      final file = File(filePath);
+
+      if (!await file.exists()) {
+        debugPrint('File does not exist at path: $filePath');
+        return null;
+      }
+
+      final bytes = await file.readAsBytes();
+      final fileExt = filePath.split('.').last.toLowerCase();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'post_$timestamp.$fileExt';
+
+      debugPrint('Uploading file: $fileName to bucket: post_images');
+      debugPrint('File size: ${bytes.length} bytes');
+
+      await _supabase.storage.from('post_images').uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(
+              upsert: true,
+            ),
           );
 
-      return _supabase.storage
-          .from('post_images')
-          .getPublicUrl(fileName);
-    } catch (e) {
-      debugPrint('Error uploading image: $e');
+      final publicUrl =
+          _supabase.storage.from('post_images').getPublicUrl(fileName);
+
+      debugPrint('Upload successful: $publicUrl');
+      return publicUrl;
+    } on StorageException catch (e) {
+      debugPrint('Storage exception: ${e.message}');
+      debugPrint('Status code: ${e.statusCode}');
+      debugPrint('Error: ${e.error}');
       return null;
+    } catch (e, stackTrace) {
+      debugPrint('Error uploading image: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
     }
   }
 
@@ -101,7 +130,7 @@ class PostService {
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
-  
+
       // Update the query to include is_verified field
       final response = await _supabase.from('user_post').select('''
             *,
@@ -109,12 +138,12 @@ class PostService {
             post_likes:likes(user_email),
             comments_count:comments(count)
           ''').order('created_at', ascending: false);
-  
+
       // Add verification status and current user email to each post
       return response.map<PostModel>((post) {
         final userEmail = post['user_email'].toString();
         post['current_user_email'] = currentUser.email;
-        
+
         // Extract user data
         dynamic userData;
         if (post['user'] is List && post['user'].isNotEmpty) {
@@ -124,10 +153,10 @@ class PostService {
         } else {
           userData = {};
         }
-        
+
         // Set verification status
         post['is_user_verified'] = userData['is_verified'] == true;
-        
+
         return PostModel.fromJson(post);
       }).toList();
     } catch (e) {

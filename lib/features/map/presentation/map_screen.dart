@@ -10,9 +10,20 @@ import '../../../shared/theme/app_colors.dart';
 import '../data/map_provider.dart';
 import '../../business/domain/business_model.dart';
 import '../../business/data/business_list_provider.dart';
+import '../data/places_search_service.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+  final int? initialBusinessId;
+  final double? initialLatitude;
+  final double? initialLongitude;
+
+  const MapScreen({
+    Key? key,
+    this.initialBusinessId,
+    this.initialLatitude,
+    this.initialLongitude,
+  }) : super(key: key);
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
@@ -36,10 +47,36 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       await _checkLocationPermission();
       await _fetchUserProfile();
       ref.read(mapProvider.notifier).initializeMap();
-      ref.read(businessListProvider.notifier).fetchAllBusinesses();
+      await ref.read(businessListProvider.notifier).fetchAllBusinesses();
+
+      // Handle initial business location
+      if (widget.initialBusinessId != null &&
+          widget.initialLatitude != null &&
+          widget.initialLongitude != null) {
+        _handleInitialBusiness();
+      }
     });
 
     _searchController.addListener(_onSearchChanged);
+  }
+
+  void _handleInitialBusiness() async {
+    // Wait for businesses to load
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final businessesState = ref.read(businessListProvider);
+    businessesState.whenData((businesses) {
+      final business = businesses.firstWhere(
+        (b) => b.id == widget.initialBusinessId,
+        orElse: () => businesses.first,
+      );
+
+      if (business.latitude != null && business.longitude != null) {
+        final location = LatLng(business.latitude!, business.longitude!);
+        _mapController.move(location, 15.0);
+        setState(() => _selectedBusiness = business);
+      }
+    });
   }
 
   @override
@@ -56,10 +93,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _lastSearchTime = now;
       if (_searchController.text.isNotEmpty) {
         _searchBusiness(_searchController.text);
+        ref
+            .read(placesSearchProvider.notifier)
+            .searchPlaces(_searchController.text);
       } else {
         ref.read(businessSearchProvider.notifier).searchBusinesses('');
+        ref.read(placesSearchProvider.notifier).clear();
       }
     }
+  }
+
+  void _onPlaceSelected(PlaceResult place) {
+    _mapController.move(place.location, 15.0);
+
+    // Mark the location on the map
+    ref.read(mapProvider.notifier).onMapTap(place.location);
+
+    // Clear search
+    _searchController.clear();
+    ref.read(businessSearchProvider.notifier).searchBusinesses('');
+    ref.read(placesSearchProvider.notifier).clear();
   }
 
   Future<void> _fetchUserProfile() async {
@@ -325,6 +378,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final mapState = ref.watch(mapProvider);
     final businessesState = ref.watch(businessListProvider);
     final businessSearchState = ref.watch(businessSearchProvider);
+    final placeResults = ref.watch(placesSearchProvider);
     final isDarkMode = ref.watch(themeProvider);
 
     final businesses = businessesState.maybeWhen(
@@ -730,8 +784,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
               ),
             ),
-
-          // Search bar
+// Search bar
           if (!mapState.isNavigating)
             Positioned(
               top: 16,
@@ -778,6 +831,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                   ref
                                       .read(businessSearchProvider.notifier)
                                       .searchBusinesses('');
+                                  ref
+                                      .read(placesSearchProvider.notifier)
+                                      .clear();
                                 },
                               ),
                         border: InputBorder.none,
@@ -787,7 +843,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       onSubmitted: _searchPlace,
                     ),
                   ),
-                  if (searchResults.isNotEmpty)
+                  if (searchResults.isNotEmpty || placeResults.isNotEmpty)
                     Container(
                       margin: const EdgeInsets.only(top: 8),
                       constraints: const BoxConstraints(maxHeight: 300),
@@ -803,61 +859,119 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           ),
                         ],
                       ),
-                      child: ListView.builder(
+                      child: ListView(
                         shrinkWrap: true,
                         padding: EdgeInsets.zero,
-                        itemCount: searchResults.length,
-                        itemBuilder: (context, index) {
-                          final business = searchResults[index];
-                          return ListTile(
-                            leading: business.imageUrl != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Image.network(
-                                      business.imageUrl!,
-                                      width: 40,
-                                      height: 40,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade300,
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        child: const Icon(Icons.business,
-                                            color: Colors.grey),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
+                        children: [
+                          // Places section
+                          if (placeResults.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Places',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                            ...placeResults.map((place) => ListTile(
+                                  leading: Container(
                                     width: 40,
                                     height: 40,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade300,
+                                      color: Colors.green.shade100,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: const Icon(Icons.business,
-                                        color: Colors.grey),
+                                    child: const Icon(
+                                      Icons.place,
+                                      color: Colors.green,
+                                    ),
                                   ),
-                            title: Text(
-                              business.businessName,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
+                                  title: Text(
+                                    place.displayName.split(',').first,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(
+                                    place.displayName,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  onTap: () => _onPlaceSelected(place),
+                                )),
+                            if (searchResults.isNotEmpty)
+                              Divider(color: Colors.grey[300], height: 1),
+                          ],
+
+                          // Businesses section
+                          if (searchResults.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Businesses',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
                             ),
-                            subtitle: Text(business.email ?? 'No email'),
-                            onTap: () => _onBusinessSelected(business),
-                          );
-                        },
+                            ...searchResults.map((business) => ListTile(
+                                  leading: business.imageUrl != null
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          child: Image.network(
+                                            business.imageUrl!,
+                                            width: 40,
+                                            height: 40,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade300,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: const Icon(Icons.business,
+                                                  color: Colors.grey),
+                                            ),
+                                          ),
+                                        )
+                                      : Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade300,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: const Icon(Icons.business,
+                                              color: Colors.grey),
+                                        ),
+                                  title: Text(
+                                    business.businessName,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(business.email ?? 'No email'),
+                                  onTap: () => _onBusinessSelected(business),
+                                )),
+                          ],
+                        ],
                       ),
                     ),
                 ],
               ),
             ),
-
           // Business details
           if (!mapState.isNavigating && _selectedBusiness != null)
             Positioned(

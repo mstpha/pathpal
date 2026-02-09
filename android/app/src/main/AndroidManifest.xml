@@ -48,7 +48,7 @@
     </queries>
     
     <application
-        android:label="pfe1"
+        android:label="pathpal"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         

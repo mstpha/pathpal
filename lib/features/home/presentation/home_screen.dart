@@ -19,6 +19,7 @@ import '../../../features/authentication/providers/auth_provider.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/theme_provider.dart';
 import '../data/post_provider.dart';
+import 'package:pfe1/features/business/presentation/browse_businesses_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -466,7 +467,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const Text('Tunisia AI Assistant'),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.amber,
                     borderRadius: BorderRadius.circular(10),
@@ -511,6 +513,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _navigateToBusiness(context);
               });
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.store),
+            title: const Text('Browse Businesses'),
+            onTap: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BrowseBusinessesScreen(),
+                ),
+              );
             },
           ),
           const Divider(),
@@ -599,7 +616,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
-              onPressed: () => context.push('/create-post'),
+              onPressed: () async {
+                final result = await context.push('/create-post');
+                // If post was created successfully, refresh the posts
+                if (result == true) {
+                  await ref.read(postListProvider.notifier).fetchPosts();
+                }
+              },
               child: const Icon(Icons.add),
             )
           : null,
