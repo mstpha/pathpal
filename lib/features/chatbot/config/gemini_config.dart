@@ -1,7 +1,7 @@
 class GeminiConfig {
-  static const String apiKey = 'AIzaSyDKbZyeYQsO7eQjGxAAMyVte_30iN5OOYk';
+  static const String apiKey = 'AIzaSyDvGG7Q3Y3mXAwpQcfzcf4GqmoqtUFNS80';
   static const String modelName = 'gemini-2.0-flash';
-  
+
   // System prompt to guide the AI's behavior
   static const String systemPrompt = '''
   You are Am Slouma, a friendly chatbot specialized in Tunisia.
