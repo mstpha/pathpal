@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pfe1/features/home/presentation/user_profile_screen.dart';
+import 'package:pathap/features/home/presentation/user_profile_screen.dart';
 
 import '../data/chat_provider.dart';
 import '../../authentication/providers/auth_provider.dart';

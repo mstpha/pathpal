@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/features/home/domain/comment_model.dart';
+import 'package:pathap/features/home/domain/comment_model.dart';
 import './comment_service.dart';
 
 class CommentState {

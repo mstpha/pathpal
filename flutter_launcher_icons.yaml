@@ -1,0 +1,20 @@
+flutter_launcher_icons:
+  image_path: "assets/images/logo2.png"
+  # Image path should be a square image, ideally 1024x1024 or larger
+  
+  android:
+    notification_icon: "notification_icon"  # Android 7.0 (API level 24) and above
+    notification_icon_color: "#8B4513"  # Brown color to match the app theme
+    
+  ios: true  # Generate iOS app icons
+  
+  # Adaptive icon configuration for Android 8.0+
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/logo2.png"
+  
+  # Web icon configuration
+  web:
+    generate: true
+    image_path: "assets/images/logo2.png"
+    background_color: "#FFFFFF"
+    theme_color: "#8B4513"

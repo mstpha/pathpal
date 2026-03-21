@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/features/business/data/business_profile_service.dart';
+import 'package:pathap/features/business/data/business_profile_service.dart';
 
-import 'package:pfe1/features/business/data/business_service.dart';
-import 'package:pfe1/features/business/domain/business_post_model.dart';
-import 'package:pfe1/features/interests/domain/interest_model.dart';
+import 'package:pathap/features/business/data/business_service.dart';
+import 'package:pathap/features/business/domain/business_post_model.dart';
+import 'package:pathap/features/interests/domain/interest_model.dart';
 
 
 import 'business_post_service.dart';

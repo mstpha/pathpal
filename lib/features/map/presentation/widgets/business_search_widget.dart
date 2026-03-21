@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../business/domain/business_model.dart';
 

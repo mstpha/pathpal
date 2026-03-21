@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/features/home/domain/comment_model.dart';
-import 'package:pfe1/features/business/data/business_post_comment_service.dart';
-import 'package:pfe1/features/authentication/providers/auth_provider.dart';
+import 'package:pathap/features/home/domain/comment_model.dart';
+import 'package:pathap/features/business/data/business_post_comment_service.dart';
+import 'package:pathap/features/authentication/providers/auth_provider.dart';
 
 class BusinessPostCommentState {
   final List<CommentModel> comments;

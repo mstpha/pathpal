@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/features/business/presentation/user_business_profile_screen.dart';
-import 'package:pfe1/features/home/presentation/user_profile_screen.dart';
-import 'package:pfe1/features/search/data/search_provider.dart';
-import 'package:pfe1/shared/theme/app_colors.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/features/business/presentation/user_business_profile_screen.dart';
+import 'package:pathap/features/home/presentation/user_profile_screen.dart';
+import 'package:pathap/features/search/data/search_provider.dart';
+import 'package:pathap/shared/theme/app_colors.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);

@@ -4,11 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:pfe1/features/authentication/domain/user_details_model.dart';
-import 'package:pfe1/features/authentication/providers/auth_provider.dart';
-import 'package:pfe1/features/authentication/data/user_details_provider.dart';
-import 'package:pfe1/shared/theme/app_colors.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/features/authentication/domain/user_details_model.dart';
+import 'package:pathap/features/authentication/providers/auth_provider.dart';
+import 'package:pathap/features/authentication/data/user_details_provider.dart';
+import 'package:pathap/shared/theme/app_colors.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 
 class UserUpdateScreen extends ConsumerStatefulWidget {
   const UserUpdateScreen({Key? key}) : super(key: key);

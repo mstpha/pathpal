@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:pfe1/features/authentication/domain/user_details_model.dart';
-import 'package:pfe1/features/authentication/providers/auth_provider.dart';
-import 'package:pfe1/shared/theme/app_colors.dart';
+import 'package:pathap/features/authentication/domain/user_details_model.dart';
+import 'package:pathap/features/authentication/providers/auth_provider.dart';
+import 'package:pathap/shared/theme/app_colors.dart';
 
 class UserDataUpdateService {
   final Ref ref;

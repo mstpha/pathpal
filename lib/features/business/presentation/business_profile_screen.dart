@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:pfe1/features/business/presentation/update_business_profile_screen.dart';
-import 'package:pfe1/features/business/presentation/create_business_post_screen.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/features/business/presentation/update_business_profile_screen.dart';
+import 'package:pathap/features/business/presentation/create_business_post_screen.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pfe1/features/home/presentation/comments_bottom_sheet.dart';
+import 'package:pathap/features/home/presentation/comments_bottom_sheet.dart';
 
 import '../data/business_profile_provider.dart';
 import '../../../shared/theme/app_colors.dart';

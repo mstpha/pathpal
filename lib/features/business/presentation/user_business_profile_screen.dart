@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/features/business/presentation/business_ratings_page.dart';
-import 'package:pfe1/features/home/presentation/business_posts_widget.dart';
-import 'package:pfe1/features/home/presentation/comments_bottom_sheet.dart';
+import 'package:pathap/features/business/presentation/business_ratings_page.dart';
+import 'package:pathap/features/home/presentation/business_posts_widget.dart';
+import 'package:pathap/features/home/presentation/comments_bottom_sheet.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';

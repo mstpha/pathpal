@@ -7,7 +7,7 @@ plugins {
 
 android {
     // Set your app’s package namespace
-    namespace = "com.example.pfe1"
+    namespace = "com.pathpal.pathap"
     
     // Set compileSdk to 34 so that dependencies requiring SDK 34 are satisfied
     compileSdk = 36
@@ -26,7 +26,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.pfe1"
+        applicationId = "com.pathpal.pathap"
         minSdkVersion = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode

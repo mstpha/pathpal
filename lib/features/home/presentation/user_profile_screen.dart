@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pfe1/features/authentication/providers/auth_provider.dart';
-import 'package:pfe1/features/chat/data/chat_provider.dart';
-import 'package:pfe1/features/chat/presentation/chat_room_screen.dart';
-import 'package:pfe1/features/home/domain/post_model.dart';
-import 'package:pfe1/features/home/presentation/profile_widget.dart'; // Import the userProfileProvider
-import 'package:pfe1/features/home/presentation/post_list_widget.dart';
-import 'package:pfe1/shared/theme/app_colors.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/features/authentication/providers/auth_provider.dart';
+import 'package:pathap/features/chat/data/chat_provider.dart';
+import 'package:pathap/features/chat/presentation/chat_room_screen.dart';
+import 'package:pathap/features/home/domain/post_model.dart';
+import 'package:pathap/features/home/presentation/profile_widget.dart'; // Import the userProfileProvider
+import 'package:pathap/features/home/presentation/post_list_widget.dart';
+import 'package:pathap/shared/theme/app_colors.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
   final String userEmail; // Required email for the profile to view

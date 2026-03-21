@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/features/search/data/search_service.dart';
+import 'package:pathap/features/search/data/search_service.dart';
 
 // Provider for the search service
 final searchServiceProvider = Provider<SearchService>((ref) {

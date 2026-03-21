@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pfe1/features/home/domain/comment_model.dart';
+import 'package:pathap/features/home/domain/comment_model.dart';
 
 class BusinessPostCommentService {
   final _supabase = Supabase.instance.client;

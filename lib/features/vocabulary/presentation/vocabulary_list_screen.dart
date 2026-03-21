@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pfe1/features/vocabulary/presentation/add_vocabulary_screen.dart';
-import 'package:pfe1/features/vocabulary/presentation/vocabulary_detail_screen.dart';
+import 'package:pathap/features/vocabulary/presentation/add_vocabulary_screen.dart';
+import 'package:pathap/features/vocabulary/presentation/vocabulary_detail_screen.dart';
 import '../data/vocabulary_provider.dart';
 import '../domain/vocabulary_model.dart';
 import '../../../shared/theme/app_colors.dart';

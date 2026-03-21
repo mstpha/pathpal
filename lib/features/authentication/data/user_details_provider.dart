@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:pfe1/features/authentication/domain/user_details_model.dart';
+import 'package:pathap/features/authentication/domain/user_details_model.dart';
 
 // State class for managing user details
 class UserDetailsState {

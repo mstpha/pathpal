@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pfe1/features/chat/data/chat_service.dart';
-import 'package:pfe1/features/chat/presentation/chat_room_screen.dart';
+import 'package:pathap/features/chat/data/chat_service.dart';
+import 'package:pathap/features/chat/presentation/chat_room_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final chatServiceProvider = Provider<ChatService>((ref) {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pfe1/features/business/data/business_list_provider.dart';
-import 'package:pfe1/features/business/domain/business_model.dart';
-import 'package:pfe1/features/business/presentation/user_business_profile_screen.dart';
-import 'package:pfe1/shared/theme/app_colors.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/features/business/data/business_list_provider.dart';
+import 'package:pathap/features/business/domain/business_model.dart';
+import 'package:pathap/features/business/presentation/user_business_profile_screen.dart';
+import 'package:pathap/shared/theme/app_colors.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 
 class BrowseBusinessesScreen extends ConsumerStatefulWidget {
   const BrowseBusinessesScreen({Key? key}) : super(key: key);

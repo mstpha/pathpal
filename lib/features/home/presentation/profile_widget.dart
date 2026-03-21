@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pfe1/shared/theme/app_colors.dart';
+import 'package:pathap/shared/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pfe1/features/authentication/domain/user_details_model.dart';
-import 'package:pfe1/features/authentication/providers/auth_provider.dart';
-import 'package:pfe1/features/home/domain/post_model.dart';
-import 'package:pfe1/features/home/presentation/post_list_widget.dart';
+import 'package:pathap/features/authentication/domain/user_details_model.dart';
+import 'package:pathap/features/authentication/providers/auth_provider.dart';
+import 'package:pathap/features/home/domain/post_model.dart';
+import 'package:pathap/features/home/presentation/post_list_widget.dart';
 
 String _generateDefaultProfileImage(String name) {
   return 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(name)}&background=random&color=fff&size=200';

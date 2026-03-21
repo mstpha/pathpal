@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pfe1/features/authentication/providers/auth_provider.dart';
-import 'package:pfe1/features/home/data/post_service.dart';
-import 'package:pfe1/features/interests/domain/interest_model.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/features/authentication/providers/auth_provider.dart';
+import 'package:pathap/features/home/data/post_service.dart';
+import 'package:pathap/features/interests/domain/interest_model.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 
 // Color Constants
 const Color _primaryColor = Color(0xFF862C24);

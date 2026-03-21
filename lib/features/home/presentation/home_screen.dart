@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pfe1/features/business/data/business_profile_provider.dart';
-import 'package:pfe1/features/chat/data/chat_service.dart';
-import 'package:pfe1/features/chat/presentation/notification_screen.dart';
-import 'package:pfe1/features/chatbot/presentation/chatbot_screen.dart';
-import 'package:pfe1/features/home/presentation/business_posts_widget.dart';
-import 'package:pfe1/features/home/presentation/profile_widget.dart';
-import 'package:pfe1/features/search/presentation/search_screen.dart';
-import 'package:pfe1/features/todos/presentation/todos_screen.dart';
-import 'package:pfe1/features/map/presentation/map_screen.dart';
-import 'package:pfe1/features/vocabulary/presentation/vocabulary_list_screen.dart';
+import 'package:pathap/features/business/data/business_profile_provider.dart';
+import 'package:pathap/features/chat/data/chat_service.dart';
+import 'package:pathap/features/chat/presentation/notification_screen.dart';
+import 'package:pathap/features/chatbot/presentation/chatbot_screen.dart';
+import 'package:pathap/features/home/presentation/business_posts_widget.dart';
+import 'package:pathap/features/home/presentation/profile_widget.dart';
+import 'package:pathap/features/search/presentation/search_screen.dart';
+import 'package:pathap/features/todos/presentation/todos_screen.dart';
+import 'package:pathap/features/map/presentation/map_screen.dart';
+import 'package:pathap/features/vocabulary/presentation/vocabulary_list_screen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
-import 'package:pfe1/features/home/presentation/post_list_widget.dart';
+import 'package:pathap/features/home/presentation/post_list_widget.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../../../features/authentication/data/user_details_provider.dart';
 import '../../../features/authentication/providers/auth_provider.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/theme_provider.dart';
 import '../data/post_provider.dart';
-import 'package:pfe1/features/business/presentation/browse_businesses_screen.dart';
+import 'package:pathap/features/business/presentation/browse_businesses_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pfe1/features/authentication/data/comment_provider.dart';
-import 'package:pfe1/features/business/data/business_comment_provider.dart';
+import 'package:pathap/features/authentication/data/comment_provider.dart';
+import 'package:pathap/features/business/data/business_comment_provider.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/theme_provider.dart';

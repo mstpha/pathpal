@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 import 'dart:io';
 
 import '../../../shared/theme/app_colors.dart';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pfe1/features/business/data/business_profile_provider.dart';
-import 'package:pfe1/features/business/domain/business_post_model.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:pathap/features/business/data/business_profile_provider.dart';
+import 'package:pathap/features/business/domain/business_post_model.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
 import 'dart:io';
 
 import '../../../shared/theme/app_colors.dart';

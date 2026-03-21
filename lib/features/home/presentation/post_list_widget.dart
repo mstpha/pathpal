@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import 'package:pfe1/features/home/domain/post_model.dart';
-import 'package:pfe1/features/home/presentation/comments_bottom_sheet.dart';
-import 'package:pfe1/features/home/presentation/profile_widget.dart';
-import 'package:pfe1/features/home/presentation/user_profile_screen.dart';
-import 'package:pfe1/shared/theme/theme_provider.dart';
-import 'package:pfe1/shared/theme/app_colors.dart';
-import 'package:pfe1/features/authentication/providers/auth_provider.dart';
-import 'package:pfe1/features/home/data/post_provider.dart';
-import 'package:pfe1/features/authentication/data/comment_provider.dart';
+import 'package:pathap/features/home/domain/post_model.dart';
+import 'package:pathap/features/home/presentation/comments_bottom_sheet.dart';
+import 'package:pathap/features/home/presentation/profile_widget.dart';
+import 'package:pathap/features/home/presentation/user_profile_screen.dart';
+import 'package:pathap/shared/theme/theme_provider.dart';
+import 'package:pathap/shared/theme/app_colors.dart';
+import 'package:pathap/features/authentication/providers/auth_provider.dart';
+import 'package:pathap/features/home/data/post_provider.dart';
+import 'package:pathap/features/authentication/data/comment_provider.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PostListWidget extends ConsumerStatefulWidget {
