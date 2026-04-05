@@ -27,6 +27,52 @@ final homeBusinessPostsProvider =
   return businessPostService.fetchAllBusinessPosts();
 });
 
+class HomeBusinessPostsState {
+  final List<BusinessPostModel> posts;
+  final bool isLoading;
+
+  HomeBusinessPostsState({this.posts = const [], this.isLoading = false});
+
+  HomeBusinessPostsState copyWith(
+      {List<BusinessPostModel>? posts, bool? isLoading}) {
+    return HomeBusinessPostsState(
+      posts: posts ?? this.posts,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+}
+
+class HomeBusinessPostsNotifier extends StateNotifier<HomeBusinessPostsState> {
+  final Ref ref;
+
+  HomeBusinessPostsNotifier(this.ref) : super(HomeBusinessPostsState()) {
+    fetchPosts();
+  }
+
+  Future<void> fetchPosts() async {
+    state = state.copyWith(isLoading: true);
+    final posts =
+        await ref.read(businessPostServiceProvider).fetchAllBusinessPosts();
+    state = state.copyWith(posts: posts, isLoading: false);
+  }
+
+  void movePostToTop(int postId) {
+    final currentPosts = [...state.posts];
+    final index = currentPosts.indexWhere((p) => p.id == postId);
+    if (index != -1) {
+      final post = currentPosts.removeAt(index);
+      currentPosts.insert(0, post);
+      state = state.copyWith(posts: currentPosts);
+    }
+  }
+}
+
+final homeBusinessPostsNotifierProvider =
+    StateNotifierProvider<HomeBusinessPostsNotifier, HomeBusinessPostsState>(
+        (ref) {
+  return HomeBusinessPostsNotifier(ref);
+});
+
 class BusinessPostInteractionNotifier extends StateNotifier<bool> {
   final Ref ref;
   final int postId;
@@ -102,52 +148,30 @@ class BusinessPostsWidget extends ConsumerWidget {
     final isDarkMode = ref.watch(themeProvider);
 
     // Fetch all business posts using the provider
-    final businessPostsAsync = ref.watch(homeBusinessPostsProvider);
+    final businessPostsState = ref.watch(homeBusinessPostsNotifierProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
         // Invalidate provider to force a refresh
-        ref.invalidate(homeBusinessPostsProvider);
+  ref.read(homeBusinessPostsNotifierProvider.notifier).fetchPosts();
       },
       color: AppColors.primaryColor,
       backgroundColor: Colors.white,
       displacement: 40,
       strokeWidth: 2.0,
-      child: businessPostsAsync.when(
-        data: (posts) {
-          if (posts.isEmpty) {
-            return ListView(
-              physics: const BouncingScrollPhysics(),
-              children: const [
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text('No business posts available'),
-                  ),
-                ),
-              ],
-            );
-          }
-
-          return ListView.builder(
+      child: businessPostsState.isLoading
+    ? const Center(child: CircularProgressIndicator(color: AppColors.primaryColor))
+    : businessPostsState.posts.isEmpty
+        ? ListView(children: const [Center(child: Padding(padding: EdgeInsets.all(16), child: Text('No posts available')))])
+        : ListView.builder(
             physics: const BouncingScrollPhysics(),
-            itemCount: posts.length,
+            itemCount: businessPostsState.posts.length,
             itemBuilder: (context, index) {
-              final post = posts[index];
+              final post = businessPostsState.posts[index];
+              debugPrint('Building post card for ${post.businessName}, isVerified: ${post.isVerified}');
               return _buildBusinessPostCard(context, ref, post, isDarkMode);
             },
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryColor),
-        ),
-        error: (error, stack) => Center(
-          child: Text(
-            'Error loading business posts: $error',
-            style: const TextStyle(color: Colors.red),
           ),
-        ),
-      ),
     );
   }
 

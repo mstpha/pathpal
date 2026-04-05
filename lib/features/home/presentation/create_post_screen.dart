@@ -6,6 +6,7 @@ import 'package:pfe1/features/authentication/providers/auth_provider.dart';
 import 'package:pfe1/features/home/data/post_service.dart';
 import 'package:pfe1/features/interests/domain/interest_model.dart';
 import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Color Constants
 const Color _primaryColor = Color(0xFF862C24);
@@ -77,7 +78,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         final postService = ref.read(postServiceProvider);
         final userEmail = authState.user?.email ?? '';
 
-        await postService.createPost(
+        final post = await postService.createPost(
           userEmail: userEmail,
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim().isNotEmpty 
@@ -86,7 +87,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           imageUrl: _imageUrl,
           interests: _selectedInterests,
         );
-
+await Supabase.instance.client.functions.invoke('notify-followers', body: {
+  'sender_email': userEmail,
+  'sender_name': userEmail,
+  'post_id': post.id,
+  'post_type': 'user',
+});
         if (mounted) {
           context.pop(true);
           _showSuccessSnackBar('Post created successfully!');

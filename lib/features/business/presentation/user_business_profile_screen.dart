@@ -113,6 +113,9 @@ class UserBusinessProfileScreen extends ConsumerStatefulWidget {
       _UserBusinessProfileScreenState();
 }
 
+bool _isFollowing = false;
+String? currentUserEmail;
+
 class _UserBusinessProfileScreenState
     extends ConsumerState<UserBusinessProfileScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -175,6 +178,43 @@ class _UserBusinessProfileScreenState
             BusinessRatingsPage(businessId: widget.businessId),
       ),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    currentUserEmail = ref.read(authProvider).user?.email;
+    if (currentUserEmail != null) {
+      _checkIfFollowing();
+    }
+  }
+
+  Future<void> _checkIfFollowing() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('follows')
+          .select()
+          .eq('follower_email', currentUserEmail!)
+          .eq('target_business_id', widget.businessId)
+          .maybeSingle();
+      setState(() {
+        _isFollowing = response != null;
+      });
+    } catch (e) {
+      debugPrint('Error checking follow: $e');
+    }
+  }
+
+  Future<void> _followBusiness() async {
+    await Supabase.instance.client.functions.invoke('follow', body: {
+      'follower_email': currentUserEmail,
+      'target_business_id': widget.businessId,
+      'target_type': 'business',
+      'action': _isFollowing ? 'unfollow' : 'follow',
+    });
+    setState(() {
+      _isFollowing = true;
+    });
   }
 
   @override
@@ -322,6 +362,21 @@ class _UserBusinessProfileScreenState
                         ],
                       ),
                       const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _followBusiness,
+                        icon: Icon(_isFollowing
+                            ? Icons.person_remove
+                            : Icons.person_add),
+                        label: Text(_isFollowing ? 'Unfollow' : 'Follow'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _isFollowing
+                              ? Colors.grey
+                              : AppColors.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                        ),
+                      ),
                       _buildDetailRow(
                         icon: Icons.email,
                         label: 'Email',

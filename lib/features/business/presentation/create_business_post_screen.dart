@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pfe1/features/business/data/business_profile_provider.dart';
 import 'package:pfe1/features/business/domain/business_post_model.dart';
 import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 
 import '../../../shared/theme/app_colors.dart';
@@ -114,21 +115,15 @@ class _CreateBusinessPostScreenState
       }
 
       if (businessPost != null) {
-        // Navigate back to BusinessProfileScreen
-        final businessId = widget.businessId ??
-            (await ref.read(currentUserBusinessProvider).value)?.id;
+        await Supabase.instance.client.functions
+            .invoke('notify-followers', body: {
+          'sender_business_id': widget.businessId,
+          'sender_name': businessPost.businessName,
+          'post_id': businessPost.id,
+          'post_type': 'business',
+        });
 
-        if (businessId != null) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) =>
-                  BusinessProfileScreen(businessId: businessId),
-            ),
-          );
-        } else {
-          // Fallback navigation if no business ID is available
-          Navigator.of(context).pop(true);
-        }
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -205,7 +200,9 @@ class _CreateBusinessPostScreenState
                   ElevatedButton(
                     onPressed: _pickImage,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDarkMode ? Colors.grey[800] : AppColors.primaryColor,
+                      backgroundColor: isDarkMode
+                          ? Colors.grey[800]
+                          : AppColors.primaryColor,
                       foregroundColor: Colors.white,
                     ),
                     child: Text(_imageFile == null
@@ -248,7 +245,9 @@ class _CreateBusinessPostScreenState
                   ElevatedButton(
                     onPressed: _isLoading ? null : _submitPost,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDarkMode ? Colors.grey[800] : AppColors.primaryColor,
+                      backgroundColor: isDarkMode
+                          ? Colors.grey[800]
+                          : AppColors.primaryColor,
                       foregroundColor: Colors.white,
                       disabledBackgroundColor: Colors.grey,
                     ),

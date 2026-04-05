@@ -9,14 +9,16 @@ import 'package:pfe1/features/home/presentation/profile_widget.dart'; // Import 
 import 'package:pfe1/features/home/presentation/post_list_widget.dart';
 import 'package:pfe1/shared/theme/app_colors.dart';
 import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
   final String userEmail; // Required email for the profile to view
-  final bool isOtherUserProfile; // Flag to distinguish between current and other user profiles
+  final bool
+      isOtherUserProfile; // Flag to distinguish between current and other user profiles
 
   const UserProfileScreen({
-    Key? key, 
-    required this.userEmail, 
+    Key? key,
+    required this.userEmail,
     this.isOtherUserProfile = true, // Default to true for other user profiles
   }) : super(key: key);
 
@@ -25,10 +27,54 @@ class UserProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
+    final supabase = Supabase.instance.client;
+    bool _isFollowing = false;
+  String? currentUserEmail;
+
+  @override
+  void didChangeDependencies() {  
+    super.didChangeDependencies();
+    currentUserEmail = ref.read(authProvider).user?.email;
+    if (currentUserEmail != null) {
+      _checkIfFollowing();
+    }
+  }
+
+    Future<void> _checkIfFollowing() async {
+      final response = await Supabase.instance.client
+          .from('follows')
+          .select()
+          .eq('follower_email', currentUserEmail!)
+          .eq('target_email', widget.userEmail)
+          .maybeSingle();
+
+      setState(() {
+        _isFollowing = response != null;
+      });
+    }
+
+
+
+Future<void> followUser() async {
+  try {
+    await Supabase.instance.client.functions.invoke('follow', body: {
+      'follower_email': currentUserEmail,
+      'target_email': widget.userEmail,
+      'target_type': 'user',
+      'action': _isFollowing ? 'unfollow' : 'follow',
+    });
+    setState(() {
+      _isFollowing = !_isFollowing;
+    });
+  } catch (e) {
+    debugPrint('Error: $e');
+  }
+}
   @override
   Widget build(BuildContext context) {
     final isDarkMode = ref.watch(themeProvider);
-    final currentUserEmail = ref.read(authProvider).user?.email;
+    final userProfileAsyncValue =
+        ref.watch(userProfileProvider(widget.userEmail));
 
     // Prevent viewing own profile
     if (widget.userEmail == currentUserEmail) {
@@ -42,15 +88,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       );
     }
 
-    // Use the existing userProfileProvider to fetch user details and posts
-    final userProfileAsyncValue = ref.watch(userProfileProvider(widget.userEmail));
 
     return Scaffold(
-      appBar: _buildAppBar(context, userProfileAsyncValue.when(
-        data: (data) => data['user_details'],
-        loading: () => {},
-        error: (error, stack) => {},
-      ), isDarkMode),
+      appBar: _buildAppBar(
+          context,
+          userProfileAsyncValue.when(
+            data: (data) => data['user_details'],
+            loading: () => {},
+            error: (error, stack) => {},
+          ),
+          isDarkMode),
       body: userProfileAsyncValue.when(
         data: (data) {
           final userDetails = data['user_details'];
@@ -62,7 +109,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               children: [
                 // Profile Header
                 _buildProfileHeader(userDetails),
-                
+
                 // User Details Section
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -84,7 +131,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           const SizedBox(width: 8),
                           // Debug print to check if isVerified exists and its value
                           Builder(builder: (context) {
-                            debugPrint('Is verified: ${userDetails.isVerified}');
+                            debugPrint(
+                                'Is verified: ${userDetails.isVerified}');
                             return userDetails.isVerified == true
                                 ? Icon(
                                     Icons.verified,
@@ -96,6 +144,22 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
+                      ElevatedButton.icon(
+                        onPressed: followUser,
+                        icon: Icon(_isFollowing
+                            ? Icons.person_remove
+                            : Icons.person_add),
+                        label: Text(_isFollowing ? 'Unfollow' : 'Follow'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _isFollowing
+                              ? Colors.grey
+                              : AppColors.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
                       if (userDetails.description != null)
                         Text(
                           userDetails.description!,
@@ -105,7 +169,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           ),
                         ),
                       const SizedBox(height: 16),
-                      
+
                       // Additional User Details
                       _buildUserDetailRow(
                         icon: Icons.email,
@@ -115,7 +179,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                       _buildUserDetailRow(
                         icon: Icons.cake,
                         label: 'Date of Birth',
-                        value: DateFormat('dd MMMM yyyy').format(userDetails.dateOfBirth),
+                        value: DateFormat('dd MMMM yyyy')
+                            .format(userDetails.dateOfBirth),
                       ),
                       _buildUserDetailRow(
                         icon: Icons.location_city,
@@ -138,7 +203,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Display User's Posts
                 if (userPosts.isNotEmpty)
                   ListView.builder(
@@ -148,7 +213,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     itemBuilder: (context, index) {
                       return PostListWidget(
                         post: userPosts[index],
-                        isProfileView: true, // Maintain the isProfileView parameter
+                        isProfileView:
+                            true, // Maintain the isProfileView parameter
                       );
                     },
                   )
@@ -177,7 +243,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, dynamic userDetails, bool isDarkMode) {
+  AppBar _buildAppBar(
+      BuildContext context, dynamic userDetails, bool isDarkMode) {
     return AppBar(
       title: const Text('User Profile'),
       backgroundColor: isDarkMode ? Colors.grey[900] : AppColors.primaryColor,
@@ -192,9 +259,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             String? otherUserEmail;
             if (userDetails is Map) {
               // If it's a Map, try to get email from different possible keys
-              otherUserEmail = userDetails['email'] ?? 
-                              userDetails['user_email'] ?? 
-                              userDetails['email_address'];
+              otherUserEmail = userDetails['email'] ??
+                  userDetails['user_email'] ??
+                  userDetails['email_address'];
             } else if (userDetails != null) {
               // If it's a UserDetailsModel-like object, use its email property
               otherUserEmail = userDetails.email;
@@ -202,8 +269,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
             if (otherUserEmail == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Unable to retrieve user email'))
-              );
+                  SnackBar(content: Text('Unable to retrieve user email')));
               return;
             }
 
@@ -211,34 +277,28 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             try {
               // Create or get existing chat room
               final chatRoom = await chatService.createOrGetChatRoom(
-                currentUserEmail, 
-                otherUserEmail
-              );
+                  currentUserEmail, otherUserEmail);
 
               // Prepare other user details for chat room
-              final otherUserMap = userDetails is Map 
-                ? Map<String, dynamic>.from(userDetails)
-                : <String, dynamic>{
-                    'email': otherUserEmail,
-                    'name': userDetails.name ?? '',
-                    'family_name': userDetails.familyName ?? '',
-                    'profile_image_url': userDetails.profileImageUrl,
-                  };
+              final otherUserMap = userDetails is Map
+                  ? Map<String, dynamic>.from(userDetails)
+                  : <String, dynamic>{
+                      'email': otherUserEmail,
+                      'name': userDetails.name ?? '',
+                      'family_name': userDetails.familyName ?? '',
+                      'profile_image_url': userDetails.profileImageUrl,
+                    };
 
               // Navigate to chat room
               Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => ChatRoomScreen(
-                    chatRoomId: chatRoom.id.toString(), 
-                    otherUser: otherUserMap
-                  )
-                )
-              );
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ChatRoomScreen(
+                          chatRoomId: chatRoom.id.toString(),
+                          otherUser: otherUserMap)));
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error creating chat room: $e'))
-              );
+                  SnackBar(content: Text('Error creating chat room: $e')));
             }
           },
         ),

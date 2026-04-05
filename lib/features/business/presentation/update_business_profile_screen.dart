@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pfe1/features/authentication/providers/auth_provider.dart';
 import 'package:pfe1/shared/theme/theme_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 
 import '../../../shared/theme/app_colors.dart';
@@ -30,11 +32,16 @@ class _UpdateBusinessProfileScreenState
   late TextEditingController _latitudeController;
   late TextEditingController _longitudeController;
 
+
   String? _imageUrl;
   File? _imageFile;
   bool _isLoading = true;
   LocationInputMethod _locationMethod = LocationInputMethod.manual;
   bool _isLoadingLocation = false;
+
+  final supabase = Supabase.instance.client;
+
+
 
   @override
   void initState() {

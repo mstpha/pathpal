@@ -6,6 +6,7 @@ import 'package:pfe1/features/home/domain/post_model.dart';
 import 'package:pfe1/features/home/presentation/comments_bottom_sheet.dart';
 import 'package:pfe1/features/home/presentation/profile_widget.dart';
 import 'package:pfe1/features/home/presentation/user_profile_screen.dart';
+import 'package:pfe1/shared/providers/post_notification_provider.dart';
 import 'package:pfe1/shared/theme/theme_provider.dart';
 import 'package:pfe1/shared/theme/app_colors.dart';
 import 'package:pfe1/features/authentication/providers/auth_provider.dart';
@@ -38,7 +39,25 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(postListProvider.notifier).fetchPosts();
       });
-    }
+    ref.listenManual(postNotificationProvider, (previous, next) {
+      if (next.postId != null && !next.handled && next.postType == 'user') {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      }
+    });
+  }
+}
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _showCommentsBottomSheet(int postId) {
@@ -391,6 +410,7 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
     }
 
     return ListView.builder(
+      controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       itemCount: postListState.posts.length,
       itemBuilder: (context, index) {

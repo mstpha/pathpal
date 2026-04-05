@@ -11,6 +11,7 @@ import 'package:pfe1/features/search/presentation/search_screen.dart';
 import 'package:pfe1/features/todos/presentation/todos_screen.dart';
 import 'package:pfe1/features/map/presentation/map_screen.dart';
 import 'package:pfe1/features/vocabulary/presentation/vocabulary_list_screen.dart';
+import 'package:pfe1/shared/providers/post_notification_provider.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:pfe1/features/home/presentation/post_list_widget.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
@@ -28,16 +29,24 @@ class HomeScreen extends ConsumerStatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
   // Bottom navigation: 0 = Home (with posts tabs), 1 = Todo, 2 = Map, 3 = Profile.
   int _currentIndex = 0;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
-
+  late TabController _tabController;
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _tabController = TabController(length: 2, vsync: this); // add this
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   /// Loads user details if an email is available.
@@ -99,6 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         centerTitle: true,
         bottom: TabBar(
+          controller: _tabController,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
@@ -167,11 +177,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         IconButton(
                           icon: const Icon(Icons.notifications_outlined),
                           onPressed: () {
-                            Navigator.push(
-                              context,
+                            Navigator.of(context, rootNavigator: true).push(
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const NotificationScreen(),
+                                builder: (context) => NotificationScreen(
+                                  onPostNotificationTap: (postId, postType) {
+                                    setState(() => _currentIndex = 0);
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      if (postType == 'user') {
+                                        ref
+                                            .read(postListProvider.notifier)
+                                            .movePostToTop(postId);
+                                        _tabController.animateTo(0);
+                                      } else {
+                                        ref
+                                            .read(
+                                                homeBusinessPostsNotifierProvider
+                                                    .notifier)
+                                            .movePostToTop(postId);
+                                        _tabController.animateTo(1);
+                                      }
+                                    });
+                                  },
+                                ),
                               ),
                             );
                           },
@@ -196,10 +224,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               : IconButton(
                   icon: const Icon(Icons.notifications_outlined),
                   onPressed: () {
-                    Navigator.push(
-                      context,
+                    Navigator.of(context, rootNavigator: true).push(
                       MaterialPageRoute(
-                        builder: (context) => const NotificationScreen(),
+                        builder: (context) => NotificationScreen(
+                          onPostNotificationTap: (postId, postType) {
+                            setState(() => _currentIndex = 0);
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (postType == 'user') {
+                                ref
+                                    .read(postListProvider.notifier)
+                                    .movePostToTop(postId);
+                                _tabController.animateTo(0);
+                              } else {
+                                ref
+                                    .read(homeBusinessPostsNotifierProvider
+                                        .notifier)
+                                    .movePostToTop(postId);
+                                _tabController.animateTo(1);
+                              }
+                            });
+                          },
+                        ),
                       ),
                     );
                   },
@@ -244,11 +289,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         IconButton(
                           icon: const Icon(Icons.notifications_outlined),
                           onPressed: () {
-                            Navigator.push(
-                              context,
+                            Navigator.of(context, rootNavigator: true).push(
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const NotificationScreen(),
+                                builder: (context) => NotificationScreen(
+                                  onPostNotificationTap: (postId, postType) {
+                                    setState(() => _currentIndex = 0);
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      if (postType == 'user') {
+                                        ref
+                                            .read(postListProvider.notifier)
+                                            .movePostToTop(postId);
+                                        _tabController.animateTo(0);
+                                      } else {
+                                        ref
+                                            .read(
+                                                homeBusinessPostsNotifierProvider
+                                                    .notifier)
+                                            .movePostToTop(postId);
+                                        _tabController.animateTo(1);
+                                      }
+                                    });
+                                  },
+                                ),
                               ),
                             );
                           },
@@ -273,10 +336,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               : IconButton(
                   icon: const Icon(Icons.notifications_outlined),
                   onPressed: () {
-                    Navigator.push(
-                      context,
+                    Navigator.of(context, rootNavigator: true).push(
                       MaterialPageRoute(
-                        builder: (context) => const NotificationScreen(),
+                        builder: (context) => NotificationScreen(
+                          onPostNotificationTap: (postId, postType) {
+                            setState(() => _currentIndex = 0);
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (postType == 'user') {
+                                ref
+                                    .read(postListProvider.notifier)
+                                    .movePostToTop(postId);
+                                _tabController.animateTo(0);
+                              } else {
+                                ref
+                                    .read(homeBusinessPostsNotifierProvider
+                                        .notifier)
+                                    .movePostToTop(postId);
+                                _tabController.animateTo(1);
+                              }
+                            });
+                          },
+                        ),
                       ),
                     );
                   },
@@ -293,10 +373,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// Builds the body of the Scaffold.
-  /// For _currentIndex == 0, returns a TabBarView wrapped in a DefaultTabController.
   Widget _buildBody() {
+    // Watch for post notification taps
+
     if (_currentIndex == 0) {
       return TabBarView(
+        controller: _tabController,
         children: [
           _buildRefreshablePosts(), // User posts with refresh capability.
           BusinessPostsWidget(), // Business posts.
@@ -544,14 +626,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Handles navigation for business management.
   void _navigateToBusiness(BuildContext context) async {
+    final scaffoldMessenger =
+        ScaffoldMessenger.of(context); // store before async
     final businessProvider = ref.read(businessProfileProvider);
     final authState = ref.read(authProvider);
 
     final userEmail = authState.user?.email;
     if (userEmail == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Please log in first')),
       );
       return;
@@ -568,7 +651,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (canCreateBusiness) {
           context.push('/add-business');
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
+          scaffoldMessenger.showSnackBar(
             const SnackBar(
               content: Text('You can only create one business'),
               backgroundColor: Colors.orange,
@@ -577,7 +660,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Error accessing business: $e')),
       );
     }
@@ -632,9 +715,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: _buildTheme(isDarkMode),
-      home: _currentIndex == 0
-          ? DefaultTabController(length: 2, child: scaffold)
-          : scaffold,
+      home: scaffold,
     );
   }
 }
