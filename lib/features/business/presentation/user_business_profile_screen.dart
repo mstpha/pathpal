@@ -113,14 +113,12 @@ class UserBusinessProfileScreen extends ConsumerStatefulWidget {
       _UserBusinessProfileScreenState();
 }
 
-bool _isFollowing = false;
-String? currentUserEmail;
-
 class _UserBusinessProfileScreenState
     extends ConsumerState<UserBusinessProfileScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
-
+  bool _isFollowing = false;
+  String? currentUserEmail;
   Future<void> _refreshPosts() async {
     // Invalidate both business details and posts
     ref.invalidate(businessDetailsProvider(widget.businessId));
@@ -213,7 +211,7 @@ class _UserBusinessProfileScreenState
       'action': _isFollowing ? 'unfollow' : 'follow',
     });
     setState(() {
-      _isFollowing = true;
+      _isFollowing = !_isFollowing;
     });
   }
 
