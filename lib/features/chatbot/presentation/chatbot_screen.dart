@@ -111,21 +111,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       ),
       body: Column(
         children: [
-          // Beta badge
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            color: Colors.amber,
-            child: const Center(
-              child: Text(
-                '✨ BETA FEATURE ✨',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
+          
 
           // Chat messages
           Expanded(
@@ -227,7 +213,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                   ),
                   const SizedBox(width: 8),
                   FloatingActionButton(
-                    onPressed: _sendMessage,
+                    onPressed: _isTyping ? null : _sendMessage,
                     backgroundColor: AppColors.primaryColor,
                     elevation: 0,
                     child: const Icon(

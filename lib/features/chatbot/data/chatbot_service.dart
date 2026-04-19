@@ -1,75 +1,62 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:http/http.dart' as http;
 
 import '../config/gemini_config.dart';
 import '../domain/message_model.dart';
 
 class ChatbotService {
-  late final GenerativeModel _model;
-  ChatSession? _chatSession; // Remove 'late' keyword to allow null
+  final List<Map<String, String>> _history = [];
 
-  ChatbotService() {
-    _initializeModel();
-  }
-
-  void _initializeModel() {
-    try {
-      // Updated according to the latest documentation
-      _model = GenerativeModel(
-        model: GeminiConfig.modelName,
-        apiKey: GeminiConfig.apiKey,
-      );
-
-      // Don't call _initializeChat here, we'll do it lazily when needed
-    } catch (e) {
-      debugPrint('Error initializing Gemini model: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> _initializeChat() async {
-    try {
-      final systemPrompt = Content.text(GeminiConfig.systemPrompt);
-
-      _chatSession = _model.startChat(
-        history: [systemPrompt],
-      );
-    } catch (e) {
-      debugPrint('Error initializing chat session: $e');
-      rethrow;
-    }
+  Future<void> resetSession() async {
+    _history.clear();
   }
 
   Future<ChatbotMessage> sendMessage(String message) async {
     try {
-      // Initialize chat session if it doesn't exist
-      if (_chatSession == null) {
-        await _initializeChat();
-      }
+      _history.add({'role': 'user', 'content': message});
 
-      // Ensure _chatSession is not null before using it
-      if (_chatSession == null) {
-        throw Exception('Failed to initialize chat session');
-      }
+      // Keep only last 6 messages to save tokens
+      final recentHistory = _history.length > 6
+          ? _history.sublist(_history.length - 6)
+          : _history;
 
-      final response = await _chatSession!.sendMessage(
-        Content.text(message),
+      final response = await http.post(
+        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${GeminiConfig.apiKey}',
+        },
+        body: jsonEncode({
+          'model': GeminiConfig.modelName,
+          'messages': [
+            {'role': 'system', 'content': GeminiConfig.systemPrompt},
+            ...recentHistory,
+          ],
+          'max_tokens': 200,
+          'temperature': 0.7,
+        }),
       );
 
-      // Handle null response safely
-      final responseText =
-          response.text ?? 'Sorry, I couldn\'t generate a response.';
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final text = data['choices'][0]['message']['content'];
 
-      return ChatbotMessage(
-        text: responseText,
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
+        _history.add({'role': 'assistant', 'content': text});
+
+        return ChatbotMessage(
+          text: text,
+          isUser: false,
+          timestamp: DateTime.now(),
+        );
+      } else {
+        debugPrint('Groq error: ${response.body}');
+        throw Exception('API error: ${response.statusCode}');
+      }
     } catch (e) {
-      debugPrint('Error sending message to Gemini: $e');
+      debugPrint('Error sending message: $e');
       return ChatbotMessage(
-        text:
-            'Sorry, I encountered an error. Please try again later. Error: ${e.toString()}',
+        text: 'Am Slouma is resting right now 😴 Please try again in a moment!',
         isUser: false,
         timestamp: DateTime.now(),
       );
